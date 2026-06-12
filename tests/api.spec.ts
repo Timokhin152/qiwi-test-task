@@ -43,7 +43,7 @@ test.describe('QIWI API Тесты', () => {
 
   // 3. Создание платежа на 1 рубль
   test('3. Создание платежа на 1 рубль', async ({ request }) => {
-    const paymentId = Date.now().toString(); 
+    const paymentId = Date.now().toString();
 
     const response = await request.post(`${baseURL}/sinap/api/v2/terms/99/payments`, {
       headers: {
