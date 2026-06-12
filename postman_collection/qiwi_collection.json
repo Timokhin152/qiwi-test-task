@@ -1,0 +1,283 @@
+{
+  "info": {
+    "_postman_id": "58930189-2763-432d-ad20-b869d30b7901",
+    "name": "QIWI",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "34213226"
+  },
+  "item": [
+    {
+      "name": "1. Проверка доступности (Профиль)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус код 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Ответ содержит поле authInfo\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.have.property(\"authInfo\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer_test_token_123",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://edge.qiwi.com/person-profile/v1/profile/current",
+          "protocol": "https",
+          "host": [
+            "edge",
+            "qiwi",
+            "com"
+          ],
+          "path": [
+            "person-profile",
+            "v1",
+            "profile",
+            "current"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "1. Проверка доступности (История платежей)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer_test_token_123",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://edge.qiwi.com/payment-history/v2/persons/79999999999/payments?rows=10",
+          "protocol": "https",
+          "host": [
+            "edge",
+            "qiwi",
+            "com"
+          ],
+          "path": [
+            "payment-history",
+            "v2",
+            "persons",
+            "79999999999",
+            "payments"
+          ],
+          "query": [
+            {
+              "key": "rows",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Проверка баланса",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус код 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Баланс рублевого счета больше 0\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    \r",
+              "    // Ищем в ответе рублевый счет (qw_wallet_rub)\r",
+              "    var rubAccount = jsonData.accounts.find(acc => acc.alias === \"qw_wallet_rub\");\r",
+              "    \r",
+              "    // Проверяем, что счет найден, есть баланс, и он больше нуля\r",
+              "    pm.expect(rubAccount).to.not.be.undefined;\r",
+              "    pm.expect(rubAccount.balance).to.not.be.null;\r",
+              "    pm.expect(rubAccount.balance.amount).to.be.above(0);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer test_token_123",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://edge.qiwi.com/funding-sources/v2/persons/79999999999/accounts",
+          "protocol": "https",
+          "host": [
+            "edge",
+            "qiwi",
+            "com"
+          ],
+          "path": [
+            "funding-sources",
+            "v2",
+            "persons",
+            "79999999999",
+            "accounts"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Создание платежа (1 рубль)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer test_token_123",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"id\": \"1718200000001\",\r\n  \"sum\": {\r\n    \"amount\": 1,\r\n    \"currency\": \"643\"\r\n  },\r\n  \"paymentMethod\": {\r\n    \"type\": \"Account\",\r\n    \"accountId\": \"643\"\r\n  },\r\n  \"comment\": \"Тестовый платеж 1 рубль\",\r\n  \"fields\": {\r\n    \"account\": \"+79999999999\"\r\n  }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://edge.qiwi.com/sinap/api/v2/terms/99/payments",
+          "protocol": "https",
+          "host": [
+            "edge",
+            "qiwi",
+            "com"
+          ],
+          "path": [
+            "sinap",
+            "api",
+            "v2",
+            "terms",
+            "99",
+            "payments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Проверка исполнения платежа",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус код 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Платеж исполнен (статус SUCCESS)\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.status).to.eql(\"SUCCESS\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Сумма платежа равна 1 рублю\", function () {\r",
+              "    var jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData.sum.amount).to.eql(1);\r",
+              "    pm.expect(jsonData.sum.currency).to.eql(643);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer test_token_123",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://edge.qiwi.com/payment-history/v2/transactions/0123456789?type=OUT",
+          "protocol": "https",
+          "host": [
+            "edge",
+            "qiwi",
+            "com"
+          ],
+          "path": [
+            "payment-history",
+            "v2",
+            "transactions",
+            "0123456789"
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "OUT"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
